@@ -1,0 +1,37 @@
+name: Generate PPTX
+
+on: workflow_dispatch: push: branches: [ export/imperialismus-praesentation ]
+
+jobs: build: runs-on: ubuntu-latest
+
+Code
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
+    with:
+      persist-credentials: true
+
+  - name: Setup Node.js
+    uses: actions/setup-node@v4
+    with:
+      node-version: '18'
+
+  - name: Install pptxgenjs
+    run: |
+      npm install pptxgenjs
+
+  - name: Run PPTX generator script
+    run: |
+      node presentations/create_pptx_simple.js
+
+  - name: Commit and push generated PPTX
+    run: |
+      git config user.name "github-actions[bot]"
+      git config user.email "github-actions[bot]@users.noreply.github.com"
+      git add presentations/Imperialismus_Praesentation.pptx || true
+      if git diff --cached --quiet; then
+        echo "No changes to commit"
+      else
+        git commit -m "Add generated PPTX"
+        git push origin HEAD
+      fi
